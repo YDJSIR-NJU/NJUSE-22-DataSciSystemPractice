@@ -1,0 +1,24 @@
+pipeline {
+    agent {
+        label 'ABN-HW'
+    }
+    stages {
+        stage('SCM from Mirror') {
+            steps {
+                sh "ls -al"
+                sh "pwd"
+            }
+        }
+        stage('Build') {
+            steps {
+                sh "bash start.sh"
+            }
+        }
+        stage('Start') {
+            steps {
+                sh 'docker-compose -p lms down | true' 
+                sh 'docker-compose -p lms up -d --force-recreate --scale userservice=2 --scale commentservice=2 --scale likeservice=2'
+            }
+        }
+    }
+}

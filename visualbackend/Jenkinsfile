@@ -1,0 +1,30 @@
+pipeline {
+    agent {
+        label 'ABN-HW'
+    }
+    stages {
+        stage('SCM from Mirror') {
+            steps {
+                sh "ls -al"
+                sh "pwd"
+            }
+        }
+        stage('Build') {
+            steps {
+                sh "mvn clean package"
+            }
+        }
+        stage('Image') {
+            steps {
+                sh "docker build . -t visualbackend"
+            }
+        }
+        stage('Start') {
+            steps {
+                sh 'docker stop visualbackend | true'
+                sh 'docker rm visualbackend | true'
+                sh 'docker run -d -p 8090:8090 --name visualbackend visualbackend'
+            }
+        }
+    }
+}

@@ -1,0 +1,106 @@
+version: '2'
+services:
+  eureka-server1:
+    image: eurekaserver:logMS
+    container_name: eureka-server1
+    restart: always
+    networks:
+      - logMS-net
+    ports:
+      - "8761:8761"
+    environment:
+      - PROFILE=eureka-server1
+      - EUREKA_URL=http://eureka-server2:8762/eureka/
+    logging:
+      driver: fluentd
+      options:
+        fluentd-address: 10.168.0.23:24224
+        tag: eureka-server1
+
+
+  eureka-server2:
+    image: eurekaserver:logMS
+    container_name: eureka-server2
+    restart: always
+    networks:
+      - logMS-net
+    ports:
+      - "8762:8762"
+    environment:
+      - PROFILE=eureka-server2
+      - EUREKA_URL=http://eureka-server1:8761/eureka/
+    logging:
+      driver: fluentd
+      options:
+        fluentd-address: 10.168.0.23:24224
+        tag: eureka-server2
+
+
+  userservice:
+    image: userservice:logMS
+    restart: always
+    networks:
+      - logMS-net
+    ports:
+      - "8888"
+    environment:
+      - EUREKA_URL=http://eureka-server1:8761/eureka/,http://eureka-server2:8762/eureka/
+      - SPRING_PROFILES_ACTIVE=prod
+    logging:
+      driver: fluentd
+      options:
+        fluentd-address: 10.168.0.23:24224
+        tag: userservice
+
+  commentservice:
+    image: commentservice:logMS
+    restart: always
+    networks:
+      - logMS-net
+    ports:
+      - "8889"
+    environment:
+      - EUREKA_URL=http://eureka-server1:8761/eureka/,http://eureka-server2:8762/eureka/
+      - SPRING_PROFILES_ACTIVE=prod
+    logging:
+      driver: fluentd
+      options:
+        fluentd-address: 10.168.0.23:24224
+        tag: commentservice
+
+  likeservice:
+    image: likeservice:logMS
+    restart: always
+    networks:
+      - logMS-net
+    ports:
+      - "8890"
+    environment:
+      - EUREKA_URL=http://eureka-server1:8761/eureka/,http://eureka-server2:8762/eureka/
+      - SPRING_PROFILES_ACTIVE=prod
+    logging:
+      driver: fluentd
+      options:
+        fluentd-address: 10.168.0.23:24224
+        tag: likeservice
+
+  gateway:
+    image: gateway:logMS
+    restart: always
+    networks:
+      - logMS-net
+    ports:
+      - "8000:8000"
+    environment:
+      - EUREKA_URL=http://eureka-server1:8761/eureka/,http://eureka-server2:8762/eureka/
+    logging:
+      driver: fluentd
+      options:
+        fluentd-address: 10.168.0.23:24224
+        tag: gateway
+
+networks:
+  logMS-net:
+    driver: bridge
+
+
